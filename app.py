@@ -194,7 +194,6 @@ def get_domains():
         return jsonify({"error": str(e)}), 500
 
 @app.route("/api/domains/remove", methods=['DELETE'])
-@utils.measure_this
 def remove_domain_endpoint():
     """Remove a domain for a user"""
     try:
