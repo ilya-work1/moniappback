@@ -84,7 +84,7 @@ def update_domains(domains, username):
         
         return True
     except Exception as e:
-        print(f"Error updating domains: {e}")
+        logger.error(f"Error updating domains: {e}")
         return False
     
 

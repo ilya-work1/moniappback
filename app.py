@@ -13,6 +13,10 @@ import requests
 from oauthlib.oauth2 import WebApplicationClient
 import json
 import time
+from utils import Utils
+
+
+utils = Utils()
 
 # Initialize Flask application
 app = Flask(__name__)
@@ -153,6 +157,7 @@ def google_callback():
 
 # Domain management routes
 @app.route("/api/domains/check", methods=['POST'])
+@utils.measure_this
 def check_domains():
     """Check status of provided domains"""
     try:
@@ -161,16 +166,11 @@ def check_domains():
         username = data.get('username')
         logger.info(f"User {username} started checking {len(domains)} domains.")
         
-        #Start timing 
-        start_time = time.time()
 
         if not domains or not username:
             return jsonify({"error": "Missing required data"}), 400
         
         results = check_url(domains, username)
-        #Measure time taken
-        elapsed_time = time.time() - start_time
-        logger.info(f"Performance Summary for {username}: Checked {len(domains)} domains in {elapsed_time:.2f} seconds.")
 
         #logger.info(f"Results: {results}")
         return jsonify(results)
@@ -179,6 +179,7 @@ def check_domains():
         return jsonify({"error": str(e)}), 500
 
 @app.route("/api/domains/list", methods=['GET'])
+@utils.measure_this
 def get_domains():
     """Get list of domains for a user"""
     try:
@@ -193,6 +194,7 @@ def get_domains():
         return jsonify({"error": str(e)}), 500
 
 @app.route("/api/domains/remove", methods=['DELETE'])
+@utils.measure_this
 def remove_domain_endpoint():
     """Remove a domain for a user"""
     try:
