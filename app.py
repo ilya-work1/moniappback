@@ -14,12 +14,26 @@ from oauthlib.oauth2 import WebApplicationClient
 import json
 import time
 from utils import Utils
+from elasticapm.contrib.flask import ElasticAPM
+
 
 
 utils = Utils()
 
 # Initialize Flask application
 app = Flask(__name__)
+
+# Initialize Elastic APM
+
+app.config['ELASTIC_APM'] = {
+    'SERVICE_NAME': 'BackendService_Ilya',
+    'SECRET_TOKEN': '',
+    'SERVER_URL': '',
+    'ENVIRONMENT': 'dev',
+    'DEBUG': True,
+}
+
+apm = ElasticAPM(app)
 
 # Enable CORS for all routes
 CORS(app, resources={
@@ -40,8 +54,9 @@ scheduler.start()
 client = WebApplicationClient(Config.GOOGLE_CLIENT_ID)
 
 # Authentication routes
-@app.route("/api/auth/login", methods=['POST'])
+@app.route("/api/auth/login", methods=['POST', 'GET'])
 def login():
+    apm.capture_message('test message 3')
     """Handle user login"""
     data = request.json
     username = data.get('username')
@@ -418,7 +433,6 @@ def schedule_status():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 if __name__ == '__main__':
-    logger.info(f"Starting backend service on {Config.FLASK_HOST}:{Config.FLASK_PORT}")
     app.run(
         debug=Config.FLASK_DEBUG,
         host=Config.FLASK_HOST,
