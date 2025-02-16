@@ -9,10 +9,6 @@ import time
 from config import logger , Config
 from DataManagement import update_domains
 
-
-request_urls_queue = Queue()
-request_analyzed_queue = Queue()
-
 def check_certificate(url):
     try:
         context = ssl.create_default_context()
@@ -28,6 +24,9 @@ def check_certificate(url):
         return ('failed', 'unknown', 'unknown')
 
 def check_url_mt(domains, username):
+    # Create request-specific queues
+    request_urls_queue = Queue()
+    request_analyzed_queue = Queue()
     
     # Add domains to THIS request's queue
     for domain in domains:
