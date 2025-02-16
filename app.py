@@ -15,7 +15,8 @@ import json
 import time
 from utils import Utils
 from elasticapm.contrib.flask import ElasticAPM
-
+from elasticapm import set_custom_context, capture_span, traces
+import elasticapm
 
 
 utils = Utils()
@@ -25,15 +26,13 @@ app = Flask(__name__)
 
 # Initialize Elastic APM
 
-app.config['ELASTIC_APM'] = {
-    'SERVICE_NAME': 'BackendService_Ilya',
-    'SECRET_TOKEN': (Config.SECRET_TOKEN),
-    'SERVER_URL': (Config.SERVER_URL),
-    'ENVIRONMENT': 'dev',
-    'DEBUG': True,
-}
+apm_client= elasticapm.Client(service_name='BackendService_Ilya',  
+                            server_url=(Config.SERVER_URL),
+                            secret_token=(Config.SECRET_TOKEN),
+                            environment='dev',
+                            debug=True
+)
 
-apm = ElasticAPM(app)
 
 # Enable CORS for all routes
 CORS(app, resources={
@@ -56,7 +55,6 @@ client = WebApplicationClient(Config.GOOGLE_CLIENT_ID)
 # Authentication routes
 @app.route("/api/auth/login", methods=['POST', 'GET'])
 def login():
-    apm.capture_message('test message 3')
     """Handle user login"""
     data = request.json
     username = data.get('username')
@@ -174,6 +172,8 @@ def google_callback():
 @app.route("/api/domains/check", methods=['POST'])
 @utils.measure_this
 def check_domains():
+    apm_client.begin_transaction('domain_check')
+    apm_context=traces.execution_context.get_transaction()
     """Check status of provided domains"""
     try:
         data = request.json
@@ -185,12 +185,14 @@ def check_domains():
         if not domains or not username:
             return jsonify({"error": "Missing required data"}), 400
         
-        results = check_url(domains, username)
+        results = check_url(domains, username , apm_context)
 
         #logger.info(f"Results: {results}")
+        apm_client.end_transaction('domain_check' , 'success')
         return jsonify(results)
     except Exception as e:
         logger.error(f"Domain check error: {str(e)}")
+        apm_client.end_transaction('domain_check' , 'failed')
         return jsonify({"error": str(e)}), 500
 
 @app.route("/api/domains/list", methods=['GET'])

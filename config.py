@@ -78,7 +78,7 @@ def setup_logger():
         datefmt=Config.LOG_DATE_FORMAT
     ))
 
-     # Console handler (INFO and higher for cleaner console)
+    # Console handler (INFO and higher for cleaner console)
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.DEBUG)
     console_handler.setFormatter(logging.Formatter('%(levelname)s - %(message)s'))
