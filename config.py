@@ -37,6 +37,11 @@ class Config:
     # CORS Configuration
     CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS').split(',')
 
+    # elastic apm configuration
+    SECRET_TOKEN = os.getenv('SECRET_TOKEN')
+    SERVER_URL = os.getenv('SERVER_URL')
+
+
 def setup_logger():
     """Setup logger with daily files for the backend service"""
     if not os.path.exists(Config.LOGS_DIRECTORY):

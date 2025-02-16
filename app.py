@@ -27,8 +27,8 @@ app = Flask(__name__)
 
 app.config['ELASTIC_APM'] = {
     'SERVICE_NAME': 'BackendService_Ilya',
-    'SECRET_TOKEN': '',
-    'SERVER_URL': '',
+    'SECRET_TOKEN': (Config.SECRET_TOKEN),
+    'SERVER_URL': (Config.SERVER_URL),
     'ENVIRONMENT': 'dev',
     'DEBUG': True,
 }
@@ -433,6 +433,7 @@ def schedule_status():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 if __name__ == '__main__':
+    logger.info(f"Starting backend service on {Config.FLASK_HOST}:{Config.FLASK_PORT}")
     app.run(
         debug=Config.FLASK_DEBUG,
         host=Config.FLASK_HOST,
